@@ -7,11 +7,11 @@
 
 import UIKit
 import SwiftUI
-
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+import CoreLocation
+class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelegate {
 
     var window: UIWindow?
-
+    var locationManager: CLLocationManager!
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -28,8 +28,59 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window = window
             window.makeKeyAndVisible()
         }
+//        LocationManager = CLLocationManager()
+//        locationManager.delegate = self
+//        locationManager.requestWhenInUseAuthorization()
+        if (CLLocationManager.locationServicesEnabled()){
+                   locationManager = CLLocationManager()
+                   locationManager.delegate = self
+                   locationManager.desiredAccuracy = kCLLocationAccuracyBest
+                   locationManager.requestAlwaysAuthorization()
+                   locationManager.startUpdatingLocation()
+               }
     }
-
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedAlways {
+            if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+                if CLLocationManager.isRangingAvailable() {
+                    let uuid = UUID(uuidString: "fda50693-a4e2-4fb1-afcf-c6eb07647825")!
+                    let beaconRegion = CLBeaconRegion(proximityUUID: uuid, major: 1, minor: 2, identifier: "RDL52810")
+                    self.locationManager.startMonitoring(for: beaconRegion)
+                    self.locationManager.startRangingBeacons(in: beaconRegion)
+                }
+            }
+        }
+    }
+    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
+        if beacons.count > 0 {
+//            updateDistance(beacons[0].proximity)
+            print("\(beacons.count) beacons found.")
+            print("\(beacons[0].proximity) dist.")
+            for beacon in beacons{
+                //if(beacon.minor==1000){
+                    print("---------------------")
+                    print("Name \(beacon.description)")
+                    print("UUID \(beacon.uuid)")
+                    print("major \(beacon.major)")
+                    print("minor \(beacon.minor)")
+                    print("rssi \(beacon.rssi)")
+                    print("debugDescription \(beacon.debugDescription)")
+                    print("proximity \(beacon.proximity.rawValue)")
+                //}
+            }
+        } else {
+            print("No beacons found.")
+        }
+    }
+    // MARK: Location Manager Delegate methods
+   func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
+   {
+       let locationsObj = locations.last! as CLLocation
+       print("Current location lat-long is = \(locationsObj.coordinate.latitude) \(locationsObj.coordinate.longitude)")
+   }
+   func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+       print("Get Location failed")
+   }
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
