@@ -30,25 +30,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
         }
 //        LocationManager = CLLocationManager()
 //        locationManager.delegate = self
-//        locationManager.requestWhenInUseAuthorization()
-        if (CLLocationManager.locationServicesEnabled()){
-                   locationManager = CLLocationManager()
-                   locationManager.delegate = self
-                   locationManager.desiredAccuracy = kCLLocationAccuracyBest
-                   locationManager.requestAlwaysAuthorization()
-                   locationManager.startUpdatingLocation()
-               }
+           locationManager = CLLocationManager()
+           locationManager.delegate = self
+           locationManager.desiredAccuracy = kCLLocationAccuracyBest
+           locationManager.requestAlwaysAuthorization()
+           locationManager.requestWhenInUseAuthorization()
+           locationManager.startUpdatingLocation()
     }
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedAlways {
+        if status == .authorizedWhenInUse {
             if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
                 if CLLocationManager.isRangingAvailable() {
                     let uuid = UUID(uuidString: "fda50693-a4e2-4fb1-afcf-c6eb07647825")!
-                    let beaconRegion = CLBeaconRegion(proximityUUID: uuid, major: 1, minor: 2, identifier: "RDL52810")
+                    //let uuid = UUID(uuidString: "08f579de-c754-39df-7242-678d10ac1005")!
+                    let beaconRegion = CLBeaconRegion(proximityUUID: uuid, major: 100, minor: 1000, identifier: "RDL52810")
                     self.locationManager.startMonitoring(for: beaconRegion)
                     self.locationManager.startRangingBeacons(in: beaconRegion)
                 }
             }
+        }else{
+            print("Status is \(status == .authorizedAlways)")
         }
     }
     func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
@@ -58,13 +59,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
             print("\(beacons[0].proximity) dist.")
             for beacon in beacons{
                 //if(beacon.minor==1000){
-                    print("---------------------")
-                    print("Name \(beacon.description)")
-                    print("UUID \(beacon.uuid)")
-                    print("major \(beacon.major)")
-                    print("minor \(beacon.minor)")
+//                    print("---------------------")
+//                    print("Name \(beacon.description)")
+//                    print("UUID \(beacon.uuid)")
+//                    print("major \(beacon.major)")
+//                    print("minor \(beacon.minor)")
                     print("rssi \(beacon.rssi)")
-                    print("debugDescription \(beacon.debugDescription)")
+//                    print("debugDescription \(beacon.debugDescription)")
                     print("proximity \(beacon.proximity.rawValue)")
                 //}
             }
@@ -72,6 +73,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, CLLocationManagerDelega
             print("No beacons found.")
         }
     }
+    
     // MARK: Location Manager Delegate methods
    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
    {
